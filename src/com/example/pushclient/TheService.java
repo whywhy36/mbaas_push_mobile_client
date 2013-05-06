@@ -1,15 +1,5 @@
 package com.example.pushclient;
 
-import java.io.IOException;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.ResponseHandler;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,15 +10,16 @@ import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
-import android.os.HandlerThread;
 import android.os.IBinder;
-import android.os.Looper;
-import android.os.Message;
-import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
+
+import com.example.pushclient.protocol.AckownledgeMessage;
+import com.example.pushclient.protocol.AckownledgeMessage.Info;
+import com.example.pushclient.protocol.PushMessage;
+import com.google.gson.Gson;
+
 import de.tavendo.autobahn.WebSocketConnection;
 import de.tavendo.autobahn.WebSocketException;
 import de.tavendo.autobahn.WebSocketHandler;
@@ -46,6 +37,8 @@ public class TheService extends Service {
 	private String regId = null;
 	private String subscriberId = null;
 	
+	private Gson gson = null;
+	
 	NotificationCompat.Builder mNotificationBuilder;
 	
 	@Override
@@ -55,7 +48,7 @@ public class TheService extends Service {
 	}
 	
 	public void onCreate(){
-		Toast.makeText(this, "The Service Created", Toast.LENGTH_SHORT).show();
+		Toast.makeText(this, "The service created", Toast.LENGTH_SHORT).show();
 		Log.d(TAG, "onCreate");
 	}
 	
@@ -66,13 +59,16 @@ public class TheService extends Service {
 	}
 	
 	public int onStartCommand(Intent intent, int flags, int startId){
+		if(gson == null){
+			gson = new Gson();
+		}
 		Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
 		regId = intent.getStringExtra("regId");
 		subscriberId = intent.getStringExtra("subscriberId");
+		Log.d(TAG, "regId is "+ regId + ", and the subscriberId is " + subscriberId);
 		start();
 		return super.onStartCommand(intent, flags, startId);
 	}
-	
 	
 	public void showNotification(String content){
 		if(mNotificationBuilder == null){
@@ -91,14 +87,12 @@ public class TheService extends Service {
 			);
 		mNotificationBuilder.setContentIntent(resultPendingIntent);
 		NotificationManager mNotificationManager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
-		//mNotificationBuilder.setNumber(++mNotificationCount);
 		mNotificationBuilder.setContentText(content);
 		
 		mNotificationManager.notify(1, mNotificationBuilder.build());	
 	}
 	
-	
-  	private void start(){
+	private void start(){
 		try{
 			String[] sp = new String[1];
 			sp[0] = "msg-json";
@@ -118,12 +112,17 @@ public class TheService extends Service {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
+					Log.d(TAG, "send back to server message :" + jo.toString());
 					mConnection.sendTextMessage(jo.toString());
 				}
 				
 				public void onTextMessage(String message){
 					Log.d(TAG, "Message: " + message);
-					processMessage(message);
+					try{
+						processMessage(message);
+					}catch(Exception e){
+						e.printStackTrace();
+					}
 				}
 				
 				public void onClose(){
@@ -135,34 +134,45 @@ public class TheService extends Service {
 		}
 	}
 	
-	private void processMessage(String message){
-		try {
-			JSONObject jo = new JSONObject(message);
-			if (jo.get("event").equals("push")){
-				
-				popUpNotification(jo);
-				
-				JSONObject response = new JSONObject();
-				response.put("event", "pushAck");
-				response.put("seq", "12345");
-				response.put("info", null);
-				mConnection.sendTextMessage(response.toString());
-				
+	private void processMessage(String message) throws Exception{
+		PushMessage pushMessage = gson.fromJson(message, PushMessage.class);
+		if (pushMessage.event.equals("push")){
+			popUpNotification(pushMessage);
+			
+			AckownledgeMessage ackMessage = new AckownledgeMessage();
+			ackMessage.event = "pushAck";
+			ackMessage.seq = 12345;
+			ackMessage.info = new AckownledgeMessage.Info[1];
+			
+			AckownledgeMessage.Info theInfo = new AckownledgeMessage.Info();
+			ackMessage.info[0] = theInfo;
+			theInfo.regId = regId;
+			
+			PushMessage.Info.Message[] messages = pushMessage.info[0].messages;
+			theInfo.messageIds = new String[messages.length];
+			
+			for(int i=0; i < messages.length; i++){
+				ackMessage.info[0].messageIds[i] = messages[i].id;
 			}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			
+			String response = gson.toJson(ackMessage);
+			Log.d(TAG, "the response is :" + response);
+			mConnection.sendTextMessage(response);
+		}else{
+			// do nothing
 		}
 	}
 	
-	private void popUpNotification(JSONObject msgObject) throws JSONException{
-		JSONObject one = (JSONObject)((JSONArray)msgObject.get("info")).get(0);
-		JSONArray messages = (JSONArray)(one.get("messages"));
-		String messageStr = (String) ((JSONObject)(messages.get(0))).get("content");
-		JSONObject theObject = new JSONObject(messageStr);
-		String content = (String) ((JSONObject) theObject.get("data")).get("message");
-		Log.d(TAG, "The message is " + content );
-		showNotification(content);
+	private void popUpNotification(PushMessage msgObject) throws JSONException{
+		PushMessage.Info[] info = msgObject.info;
+		PushMessage.Info theInfo = info[0];
+		PushMessage.Info.Message[] messages = theInfo.messages;
+		for(int i=0; i< messages.length; i++){
+			JSONObject message = new JSONObject(messages[i].content);
+			String content = (String) ((JSONObject)message.get("data")).get("message");
+			Log.d(TAG, "The message is " + content );
+			showNotification(content);
+		}
 	}
 	
 }

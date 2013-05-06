@@ -107,22 +107,22 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onToggleClicked(View view){
 		switch(view.getId()){
 		case R.id.toggleButtonApple:
-			topicAction(view, "apple");
+			topicAction(view, "Apple");
 			break;
 		case R.id.ToggleButtonAmazon:
-			topicAction(view, "amazon");
+			topicAction(view, "Amazon");
 			break;
 		case R.id.ToggleButtonIntel:
-			topicAction(view, "intel");
+			topicAction(view, "Intel");
 			break;
 		case R.id.ToggleButtonGoogle:
-			topicAction(view, "google");
+			topicAction(view, "Google");
 			break;
 		case R.id.ToggleButtonMicrosoft:
-			topicAction(view, "microsoft");
+			topicAction(view, "Microsoft");
 			break;
 		case R.id.ToggleButtonVMware:
-			topicAction(view, "vmware");
+			topicAction(view, "VMware");
 			break;
 		case R.id.switchService:
 			registerAction(view);
@@ -227,7 +227,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			String subscribers_url = PUSH_ENGINE + "/subscribers";
 			JSONObject reqObj = new JSONObject();
 			reqObj.put("proto", "vns");
-			reqObj.put("token", "regId");
+			reqObj.put("token", regId);
 			HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler);
 		}
 		

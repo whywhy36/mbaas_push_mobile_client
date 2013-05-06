@@ -1,0 +1,153 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context=".MainActivity" >
+
+    <TextView
+        android:id="@+id/textViewStatus"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/switchService"
+        android:layout_alignParentTop="true"
+        android:layout_alignRight="@+id/switchService"
+        android:layout_marginTop="22dp"
+        android:text="Push Notificaton"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <Switch
+        android:id="@+id/switchService"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/textViewStatus"
+        android:layout_marginRight="14dp"
+        android:layout_marginTop="32dp"
+        android:onClick="onToggleClicked"
+        android:textOn="@string/stop"
+        android:textOff="@string/start"
+        android:text="Service" />
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/switchService"
+        android:layout_marginLeft="17dp"
+        android:layout_marginTop="31dp"
+        android:src="@drawable/ic_launcher" />
+
+    <ToggleButton
+        android:id="@+id/toggleButtonApple"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/imageView1"
+        android:layout_toRightOf="@+id/imageView1"
+        android:onClick="onToggleClicked"
+        android:textOn="@string/unsub"
+        android:textOff="@string/sub"
+        android:text="Apple" />
+
+    <ImageView
+        android:id="@+id/ImageView01"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/switchService"
+        android:layout_alignTop="@+id/toggleButtonApple"
+        android:layout_marginLeft="21dp"
+        android:src="@drawable/ic_launcher" />
+
+    <ToggleButton
+        android:id="@+id/ToggleButtonAmazon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/ImageView01"
+        android:layout_toRightOf="@+id/ImageView01"
+        android:onClick="onToggleClicked"
+        android:textOn="@string/unsub"
+        android:textOff="@string/sub"
+        android:text="Amazon" />
+
+    <ImageView
+        android:id="@+id/ImageView02"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/imageView1"
+        android:layout_centerVertical="true"
+        android:src="@drawable/ic_launcher" />
+
+    <ToggleButton
+        android:id="@+id/ToggleButtonIntel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/ImageView02"
+        android:layout_toRightOf="@+id/ImageView02"
+        android:onClick="onToggleClicked"
+        android:textOn="@string/unsub"
+        android:textOff="@string/sub"
+        android:text="Intel" />
+
+    <ImageView
+        android:id="@+id/ImageView03"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/ToggleButtonIntel"
+        android:layout_toLeftOf="@+id/ToggleButtonAmazon"
+        android:src="@drawable/ic_launcher" />
+
+    <ToggleButton
+        android:id="@+id/ToggleButtonGoogle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/ImageView03"
+        android:layout_toRightOf="@+id/ImageView03"
+        android:onClick="onToggleClicked"
+        android:textOn="@string/unsub"
+        android:textOff="@string/sub"
+        android:text="Google" />
+
+    <ImageView
+        android:id="@+id/ImageView04"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ImageView02"
+        android:layout_below="@+id/ImageView02"
+        android:layout_marginTop="40dp"
+        android:src="@drawable/ic_launcher" />
+
+    <ToggleButton
+        android:id="@+id/ToggleButtonMicrosoft"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignTop="@+id/ImageView04"
+        android:layout_toRightOf="@+id/ImageView04"
+        android:onClick="onToggleClicked"
+        android:textOn="@string/unsub"
+        android:textOff="@string/sub"
+        android:text="Microsoft" />
+
+    <ImageView
+        android:id="@+id/ImageView05"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ImageView03"
+        android:layout_alignTop="@+id/ToggleButtonMicrosoft"
+        android:src="@drawable/ic_launcher" />
+
+    <ToggleButton
+        android:id="@+id/ToggleButtonVMware"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/ToggleButtonGoogle"
+        android:layout_alignTop="@+id/ImageView05"
+        android:onClick="onToggleClicked"
+        android:textOn="@string/unsub"
+        android:textOff="@string/sub"
+        android:text="VMware" />
+
+</RelativeLayout>

@@ -67,6 +67,8 @@ public class TheService extends Service {
 	
 	public int onStartCommand(Intent intent, int flags, int startId){
 		Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+		regId = intent.getStringExtra("regId");
+		subscriberId = intent.getStringExtra("subscriberId");
 		start();
 		return super.onStartCommand(intent, flags, startId);
 	}
@@ -97,7 +99,6 @@ public class TheService extends Service {
 	
 	
   	private void start(){
-  		Log.d(TAG, "Status: enter start ...");
 		try{
 			String[] sp = new String[1];
 			sp[0] = "msg-json";

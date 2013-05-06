@@ -176,7 +176,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				case REGISTER_DEVICE:
 					register();
 					connectPE();
-					startService(new Intent(that, TheService.class));
+					//startService(new Intent(that, TheService.class));
 					break;
 				case UNREGISTER_DEVICE:
 					//TODO:
@@ -214,6 +214,10 @@ public class MainActivity extends Activity implements OnClickListener {
 						responseString = EntityUtils.toString(response.getEntity());
 						subscriberId = (String)HttpUtils.responseGet(responseString, "id");
 						Log.d(TAG, "the response of connection to PE is " + responseString);
+						Intent intent = new Intent(that, TheService.class);
+						intent.putExtra("regId", regId);
+						intent.putExtra("subscriberId", subscriberId);
+						startService(intent);
 					}catch(Exception e){
 						e.printStackTrace();
 					}	

@@ -248,7 +248,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					subscribe(topic);
 					break;
 				case UNSUBSCRIBE_ACTION:
-					//TODO:
+					unsubscribe(topic);
 					break;
 				case REGISTER_DEVICE:
 					register();
@@ -408,6 +408,18 @@ public class MainActivity extends Activity implements OnClickListener {
 			showToast("subscribing the topic " + topic);
 			String subscribe_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
 			HttpUtils.restPost(subscribe_url, "{}", resHandler);
+		}
+		
+		private void unsubscribe(String topic) throws ClientProtocolException, IOException{
+			ResponseHandler resHandler = new ResponseHandler(){
+				public Object handleResponse(HttpResponse response){
+					return null;
+				}
+			};
+			Log.d(TAG, "try to unsubscribe topic:" + topic);
+			showToast("unsubscribing the topic " + topic);
+			String subscribe_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
+			HttpUtils.restDelete(subscribe_url, resHandler);
 		}
 	}
 }

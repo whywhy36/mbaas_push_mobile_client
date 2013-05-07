@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -25,6 +26,12 @@ public class HttpUtils {
 		HttpClient hc = new DefaultHttpClient();
 		HttpGet httpGet = new HttpGet(endpoint);
 		hc.execute(httpGet, resHandler);
+	}
+	
+	public static void restDelete(String endpoint, ResponseHandler resHandler) throws ClientProtocolException, IOException {
+		HttpClient hc = new DefaultHttpClient();
+		HttpDelete httpDelete = new HttpDelete(endpoint);
+		hc.execute(httpDelete, resHandler);
 	}
 	
 	public static Object responseGet(String responseStr, String key) throws JSONException{

@@ -11,6 +11,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,8 +42,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int UNSUBSCRIBE_ACTION = 2;
 	private static final int REGISTER_DEVICE = 3;
 	private static final int UNREGISTER_DEVICE = 4;
+	private static final int REENTER = 5;
 	
 	ToggleButton mToggleButtonApple, mToggleButtonAmazon, mToggleButtonIntel, mToggleButtonGoogle, mToggleButtonMicrosoft, mToggleButtonVMware;
+	HashMap<String, Boolean> mButtonStates;
 	
 	Switch mSwitchService;
 	TextView mTextViewStatus;
@@ -83,6 +87,9 @@ public class MainActivity extends Activity implements OnClickListener {
         
         mTeleManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         that = this;
+        
+        mButtonStates = new HashMap<String, Boolean>();
+        //initButtonStates();
     }
 
     @Override
@@ -96,6 +103,28 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onClick(View src) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private boolean isTheServiceRunning(){
+		ActivityManager manager = (ActivityManager)getSystemService(Context.ACTIVITY_SERVICE);
+		for (RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+	        if (TheService.class.getName().equals(service.service.getClassName())) {
+	            return true;
+	        }
+	    }
+		return false;
+	}
+	
+	protected void onResume(){
+		super.onResume();
+		if(isTheServiceRunning()){
+			mSwitchService.setChecked(true);
+			reEnterApp();
+		}
+	}
+	
+	protected void onPause(){
+		super.onPause();
 	}
 	
 	private void setToggleButtonStatus(boolean flag){
@@ -164,6 +193,12 @@ public class MainActivity extends Activity implements OnClickListener {
 		mHttpHandler.sendMessage(message);
 	}
 	
+	private void reEnterApp(){
+		Message message = mHttpHandler.obtainMessage();
+		message.obj = new MessageObject(this.REENTER, null);
+		mHttpHandler.sendMessage(message);
+	}
+	
 	private void registerDevice(boolean flag){
 		Message message = mHttpHandler.obtainMessage();
 		if(flag){
@@ -212,11 +247,14 @@ public class MainActivity extends Activity implements OnClickListener {
 					break;
 				case REGISTER_DEVICE:
 					register();
-					connectPE();
+					connectPE(true);
 					break;
 				case UNREGISTER_DEVICE:
-					//TODO:
 					stopService(new Intent(that, TheService.class));
+					break;
+				case REENTER:
+					register();
+					connectPE(false);
 					break;
 				}
 			}catch(Exception e){
@@ -239,7 +277,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			};
 			String register_url = REG_SERVER + "/register";
-			HttpUtils.restPost(register_url, "{\"appKey\": \"3001\", \"deviceFingerPrint\": \"" + getDeviceId() + "\"}", resHandler);
+			HttpUtils.restPost(register_url, "{\"appKey\": \"3002\", \"deviceFingerPrint\": \"" + getDeviceId() + "\"}", resHandler);
 		}
 		
 		private String getDeviceId(){
@@ -250,7 +288,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			return deviceId;
 		}
 		
-		private void connectPE() throws ClientProtocolException, IOException, JSONException{
+		private void connectPE(boolean startServiceFlag) throws ClientProtocolException, IOException, JSONException{
 			ResponseHandler resHandler = new ResponseHandler(){
 				public Object handleResponse(HttpResponse response){
 					String responseString;
@@ -269,11 +307,32 @@ public class MainActivity extends Activity implements OnClickListener {
 					return null;
 				}
 			};
+			
+			ResponseHandler resHandler2 = new ResponseHandler(){
+				public Object handleResponse(HttpResponse response){
+					String responseString;
+					try{
+						responseString = EntityUtils.toString(response.getEntity());
+						subscriberId = (String)HttpUtils.responseGet(responseString, "id");
+						Log.d(TAG, "the response of connection to PE is " + responseString);
+						fetchSubscribeList();
+					}catch(Exception e){
+						e.printStackTrace();
+					}	
+					return null;
+				}
+			};
+			
 			String subscribers_url = PUSH_ENGINE + "/subscribers";
 			JSONObject reqObj = new JSONObject();
 			reqObj.put("proto", "vns");
 			reqObj.put("token", regId);
-			HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler);
+			if(startServiceFlag){
+				HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler);
+			}else{
+				HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler2);
+			}
+			
 		}
 		
 		private void fetchSubscribeList() throws ClientProtocolException, IOException{

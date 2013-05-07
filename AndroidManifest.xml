@@ -25,6 +25,13 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity
+            android:name="com.example.pushclient.InfoActivity"
+            android:label="@string/info_name">
+            <intent-filter>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <service 
             android:name="com.example.pushclient.TheService"
             android:label="@string/service_name" >

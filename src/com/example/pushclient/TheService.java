@@ -77,9 +77,10 @@ public class TheService extends Service {
 					.setContentText("Notification test")
 					.setAutoCancel(true);
 		}
-		Intent resultIntent = new Intent(this, MainActivity.class);
+		Intent resultIntent = new Intent(this, InfoActivity.class);
+		resultIntent.putExtra("content", content);
 		TaskStackBuilder stackBuilder = TaskStackBuilder.create(this);
-		stackBuilder.addParentStack(MainActivity.class);
+		stackBuilder.addParentStack(InfoActivity.class);
 		stackBuilder.addNextIntent(resultIntent);
 		PendingIntent resultPendingIntent = stackBuilder.getPendingIntent(
 				0,

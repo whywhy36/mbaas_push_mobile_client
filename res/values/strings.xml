@@ -8,5 +8,6 @@
     <string name="unsub">unsubscribe</string>
     <string name="start">start</string>
     <string name="stop">stop</string>
+    <string name="info_name">Notification Message</string>
 
 </resources>

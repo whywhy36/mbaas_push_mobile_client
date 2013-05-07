@@ -15,6 +15,7 @@ import android.app.ActivityManager;
 import android.app.ActivityManager.RunningServiceInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -24,6 +25,7 @@ import android.os.Process;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Switch;
@@ -34,10 +36,6 @@ import android.widget.ToggleButton;
 public class MainActivity extends Activity implements OnClickListener {
 
 	private static final String TAG = "MainActivity";
-	
-	private static final String URL = "ws://10.110.185.92:10280";
-	private static final String REG_SERVER = "http://10.110.185.92:10080";
-	private static final String PUSH_ENGINE = "http://10.110.185.90";
 	
 	private static final int SUBSCRIBE_ACTION = 1;
 	private static final int UNSUBSCRIBE_ACTION = 2;
@@ -100,6 +98,16 @@ public class MainActivity extends Activity implements OnClickListener {
         return true;
     }
 
+    public boolean onOptionsItemSelected(MenuItem item){
+    	if(item.getItemId() == R.id.action_settings){
+    		Intent intent = new Intent(this, SettingsActivity.class);
+    		startActivity(intent);
+    		return true;
+    	}else{
+    		return super.onOptionsItemSelected(item);
+    	}
+    }
+    
 	@Override
 	public void onClick(View src) {
 		// TODO Auto-generated method stub
@@ -214,6 +222,16 @@ public class MainActivity extends Activity implements OnClickListener {
 		mHttpHandler.sendMessage(message);
 	}
 	
+	private String pushEngineUrl(){
+		SharedPreferences settings = getSharedPreferences( Constants.PREFS_NAME, 0);
+		return settings.getString(Constants.PUSH_ENGINE, Constants.DEFAULT_PE_URL);
+	}
+	
+	private String registerServerUrl(){
+		SharedPreferences settings = getSharedPreferences( Constants.PREFS_NAME, 0);
+		return settings.getString(Constants.REGISTER_SERVER, Constants.DEFAULT_RS_URL);
+	}
+	
 	private final class UIHandler extends Handler {
 		public UIHandler(Looper looper){
 			super(looper);
@@ -281,7 +299,7 @@ public class MainActivity extends Activity implements OnClickListener {
 					return null;
 				}
 			};
-			String register_url = REG_SERVER + "/register";
+			String register_url = registerServerUrl() + "/register";
 			HttpUtils.restPost(register_url, "{\"appKey\": \"3002\", \"deviceFingerPrint\": \"" + getDeviceId() + "\"}", resHandler);
 		}
 		
@@ -328,7 +346,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			};
 			
-			String subscribers_url = PUSH_ENGINE + "/subscribers";
+			String subscribers_url = pushEngineUrl() + "/subscribers";
 			JSONObject reqObj = new JSONObject();
 			reqObj.put("proto", "vns");
 			reqObj.put("token", regId);
@@ -365,7 +383,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			};
 			
 			showToast("Synchronizing the subscription list.");
-			String list_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions";
+			String list_url = pushEngineUrl() + "/subscriber/" + subscriberId + "/subscriptions";
 			HttpUtils.restGet(list_url, resHandler);
 		}
 		
@@ -406,7 +424,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			};
 			Log.d(TAG, "try to subscribe topic:" + topic);
 			showToast("subscribing the topic " + topic);
-			String subscribe_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
+			String subscribe_url = pushEngineUrl() + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
 			HttpUtils.restPost(subscribe_url, "{}", resHandler);
 		}
 		
@@ -418,7 +436,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			};
 			Log.d(TAG, "try to unsubscribe topic:" + topic);
 			showToast("unsubscribing the topic " + topic);
-			String subscribe_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
+			String subscribe_url = pushEngineUrl() + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
 			HttpUtils.restDelete(subscribe_url, resHandler);
 		}
 	}

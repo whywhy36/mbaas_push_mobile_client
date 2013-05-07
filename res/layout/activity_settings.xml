@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+
+    <EditText
+        android:id="@+id/editTextWSURL"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Websocket URL"
+        android:ems="10" >
+
+        <requestFocus />
+    </EditText>
+
+    <EditText
+        android:id="@+id/editTextPushEngine"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Push Engine URL"
+        android:ems="10" />
+
+    <EditText
+        android:id="@+id/editTextRegisterServer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Register Server"
+        android:ems="10" />
+
+    <Button
+        android:id="@+id/buttonSettingSave"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save" />
+
+</LinearLayout>

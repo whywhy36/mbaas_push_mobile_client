@@ -10,6 +10,7 @@ import android.app.Service;
 import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
@@ -28,9 +29,6 @@ import de.tavendo.autobahn.WebSocketOptions;
 public class TheService extends Service {
 
 	private static final String TAG = "TheService";
-	private static final String URL = "ws://10.110.185.92:10280";
-	private static final String REG_SERVER = "http://10.110.185.92:10080";
-	private static final String PUSH_ENGINE = "http://10.110.185.90";
 	
 	private final WebSocketConnection mConnection = new WebSocketConnection();
 	
@@ -98,15 +96,20 @@ public class TheService extends Service {
 		mNotificationManager.notify(1, mNotificationBuilder.build());	
 	}
 	
+	private String webSocketUrl(){
+		SharedPreferences settings = getSharedPreferences( Constants.PREFS_NAME, 0);
+		return settings.getString(Constants.WEB_SOCKET, Constants.DEFAULT_WS_URL);
+	}
+	
 	private void start(){
 		try{
 			String[] sp = new String[1];
 			sp[0] = "msg-json";
 			
-			mConnection.connect(URL, sp, new WebSocketHandler(){
+			mConnection.connect(webSocketUrl(), sp, new WebSocketHandler(){
 				public void onOpen(){
-					showToast("Connected to " + URL);
-					Log.d(TAG, "Status: Connected to " + URL);
+					showToast("Connected to " + webSocketUrl());
+					Log.d(TAG, "Status: Connected to " + webSocketUrl());
 
 					JSONObject jo = new JSONObject();
 					try {

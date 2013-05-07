@@ -16,7 +16,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/switchService"
         android:layout_marginTop="22dp"
-        android:text="Push Notificaton"
+        android:text="News Notification"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Switch

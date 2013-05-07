@@ -19,6 +19,7 @@ public class InfoActivity extends Activity implements OnClickListener{
 		
 		mTextViewInfo = (TextView) findViewById(R.id.textViewInfo);
 		mButton = (Button)findViewById(R.id.buttonBackToConsole);
+		mButton.setOnClickListener(this);
 	}
 	
 	protected void onStart(){
@@ -34,7 +35,8 @@ public class InfoActivity extends Activity implements OnClickListener{
 	public void onClick(View view) {
 		int viewId = view.getId();
 		if(viewId == R.id.buttonBackToConsole){
-			
+			Intent intent = new Intent(this, MainActivity.class);
+			startActivity(intent);
 		}
 	}
 }

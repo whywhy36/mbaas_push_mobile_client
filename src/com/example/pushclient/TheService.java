@@ -48,13 +48,14 @@ public class TheService extends Service {
 	}
 	
 	public void onCreate(){
-		Toast.makeText(this, "The service created", Toast.LENGTH_SHORT).show();
+		showToast("The service created.");
 		Log.d(TAG, "onCreate");
 	}
 	
 	public void onDestroy(){
-		Toast.makeText(this, "The service destroyed", Toast.LENGTH_SHORT).show();
+		showToast("Disconnecting the server.");
 		mConnection.disconnect();
+		showToast("The service destroyed.");
 		Log.d(TAG, "onDestroy");
 	}
 	
@@ -62,12 +63,16 @@ public class TheService extends Service {
 		if(gson == null){
 			gson = new Gson();
 		}
-		Toast.makeText(this, "service starting", Toast.LENGTH_SHORT).show();
+		showToast("The service starting.");
 		regId = intent.getStringExtra("regId");
 		subscriberId = intent.getStringExtra("subscriberId");
 		Log.d(TAG, "regId is "+ regId + ", and the subscriberId is " + subscriberId);
 		start();
 		return super.onStartCommand(intent, flags, startId);
+	}
+	
+	private void showToast(String message){
+		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 	}
 	
 	public void showNotification(String content){
@@ -100,6 +105,7 @@ public class TheService extends Service {
 			
 			mConnection.connect(URL, sp, new WebSocketHandler(){
 				public void onOpen(){
+					showToast("Connected to " + URL);
 					Log.d(TAG, "Status: Connected to " + URL);
 
 					JSONObject jo = new JSONObject();

@@ -28,6 +28,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
 public class MainActivity extends Activity implements OnClickListener {
@@ -125,6 +126,10 @@ public class MainActivity extends Activity implements OnClickListener {
 	
 	protected void onPause(){
 		super.onPause();
+	}
+	
+	private void showToast(String message){
+		Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
 	}
 	
 	private void setToggleButtonStatus(boolean flag){
@@ -352,7 +357,6 @@ public class MainActivity extends Activity implements OnClickListener {
 						Message message = mUIHandler.obtainMessage();
 						message.obj = topicStatus;
 						mUIHandler.sendMessage(message);
-
 					}catch(Exception e){
 						e.printStackTrace();
 					}
@@ -360,6 +364,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			};
 			
+			showToast("Synchronizing the subscription list.");
 			String list_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions";
 			HttpUtils.restGet(list_url, resHandler);
 		}
@@ -400,6 +405,7 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			};
 			Log.d(TAG, "try to subscribe topic:" + topic);
+			showToast("subscribing the topic " + topic);
 			String subscribe_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
 			HttpUtils.restPost(subscribe_url, "{}", resHandler);
 		}

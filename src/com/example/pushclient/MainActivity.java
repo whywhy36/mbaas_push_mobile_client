@@ -1,6 +1,7 @@
 package com.example.pushclient;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
@@ -18,6 +19,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -45,13 +47,15 @@ public class MainActivity extends Activity implements OnClickListener {
 	TextView mTextViewStatus;
 	
 	private HttpHandler mHttpHandler;
+	private UIHandler mUIHandler;
 	private Looper mHttpLooper;
 	
 	private String regId;
 	private String subscriberId;
 	
 	private Context that;
-	
+	private TelephonyManager mTeleManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -63,6 +67,8 @@ public class MainActivity extends Activity implements OnClickListener {
         mToggleButtonGoogle = (ToggleButton) findViewById(R.id.ToggleButtonGoogle);
         mToggleButtonMicrosoft = (ToggleButton) findViewById(R.id.ToggleButtonMicrosoft);
         mToggleButtonVMware = (ToggleButton) findViewById(R.id.ToggleButtonVMware);
+       
+        setToggleButtonStatus(false);
         
         mSwitchService = (Switch)findViewById(R.id.switchService);
         
@@ -73,7 +79,9 @@ public class MainActivity extends Activity implements OnClickListener {
         
         mHttpLooper = thread.getLooper();
         mHttpHandler = new HttpHandler(mHttpLooper);
+        mUIHandler = new UIHandler(Looper.getMainLooper());
         
+        mTeleManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         that = this;
     }
 
@@ -88,6 +96,15 @@ public class MainActivity extends Activity implements OnClickListener {
 	public void onClick(View src) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private void setToggleButtonStatus(boolean flag){
+		mToggleButtonApple.setEnabled(flag);
+		mToggleButtonAmazon.setEnabled(flag);
+		mToggleButtonIntel.setEnabled(flag);
+		mToggleButtonGoogle.setEnabled(flag);
+		mToggleButtonMicrosoft.setEnabled(flag);
+		mToggleButtonVMware.setEnabled(flag);
 	}
 	
 	public void topicAction(View view, String topic ){
@@ -125,6 +142,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			topicAction(view, "VMware");
 			break;
 		case R.id.switchService:
+			setToggleButtonStatus(false);
 			registerAction(view);
 			break;
 		}
@@ -156,6 +174,25 @@ public class MainActivity extends Activity implements OnClickListener {
 		mHttpHandler.sendMessage(message);
 	}
 	
+	private final class UIHandler extends Handler {
+		public UIHandler(Looper looper){
+			super(looper);
+		}
+		
+		public void handleMessage(Message msg){
+			HashMap states = (HashMap) msg.obj;
+			
+			mToggleButtonApple.setChecked((Boolean) states.get("Apple"));
+			mToggleButtonAmazon.setChecked((Boolean) states.get("Amazon"));
+			mToggleButtonIntel.setChecked((Boolean) states.get("Intel"));
+			mToggleButtonGoogle.setChecked((Boolean) states.get("Google"));
+			mToggleButtonMicrosoft.setChecked((Boolean) states.get("Microsoft"));
+			mToggleButtonVMware.setChecked((Boolean) states.get("VMware"));
+			
+			setToggleButtonStatus(true);
+		}
+	}
+	
 	private final class HttpHandler extends Handler {
 		public HttpHandler(Looper looper){
 			super(looper);
@@ -176,7 +213,6 @@ public class MainActivity extends Activity implements OnClickListener {
 				case REGISTER_DEVICE:
 					register();
 					connectPE();
-					//startService(new Intent(that, TheService.class));
 					break;
 				case UNREGISTER_DEVICE:
 					//TODO:
@@ -203,7 +239,15 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			};
 			String register_url = REG_SERVER + "/register";
-			HttpUtils.restPost(register_url, "{\"appKey\": \"100\", \"deviceFingerPrint\": \"1111\"}", resHandler);
+			HttpUtils.restPost(register_url, "{\"appKey\": \"3001\", \"deviceFingerPrint\": \"" + getDeviceId() + "\"}", resHandler);
+		}
+		
+		private String getDeviceId(){
+			String deviceId = mTeleManager.getDeviceId();
+			if (deviceId == null){
+				deviceId = "emulator";
+			}
+			return deviceId;
 		}
 		
 		private void connectPE() throws ClientProtocolException, IOException, JSONException{
@@ -214,6 +258,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						responseString = EntityUtils.toString(response.getEntity());
 						subscriberId = (String)HttpUtils.responseGet(responseString, "id");
 						Log.d(TAG, "the response of connection to PE is " + responseString);
+						fetchSubscribeList();
 						Intent intent = new Intent(that, TheService.class);
 						intent.putExtra("regId", regId);
 						intent.putExtra("subscriberId", subscriberId);
@@ -229,6 +274,55 @@ public class MainActivity extends Activity implements OnClickListener {
 			reqObj.put("proto", "vns");
 			reqObj.put("token", regId);
 			HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler);
+		}
+		
+		private void fetchSubscribeList() throws ClientProtocolException, IOException{
+			ResponseHandler resHandler = new ResponseHandler(){
+				@Override
+				public Object handleResponse(HttpResponse response)
+						throws ClientProtocolException, IOException {
+					String responseString;
+					try{
+						responseString = EntityUtils.toString(response.getEntity());
+						Log.d(TAG, "the response of subscribe list is " + responseString);
+						JSONObject jsonObject = new JSONObject(responseString);
+						HashMap<String, Boolean> topicStatus = new HashMap<String, Boolean>();
+						
+						setTopicStatus(topicStatus, jsonObject);
+						
+						Message message = mUIHandler.obtainMessage();
+						message.obj = topicStatus;
+						mUIHandler.sendMessage(message);
+
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					return null;
+				}
+			};
+			
+			String list_url = PUSH_ENGINE + "/subscriber/" + subscriberId + "/subscriptions";
+			HttpUtils.restGet(list_url, resHandler);
+		}
+		
+		private void setTopicStatus(HashMap<String, Boolean> maps, JSONObject object){
+			maps.put("Apple", getTopicState(object, "Apple"));
+			maps.put("Amazon", getTopicState(object, "Amazon"));
+			maps.put("Intel", getTopicState(object, "Intel"));
+			maps.put("Google", getTopicState(object, "Google"));
+			maps.put("Microsoft", getTopicState(object, "Microsoft"));
+			maps.put("VMware", getTopicState(object, "VMware"));
+		}
+		
+		private boolean getTopicState(JSONObject object, String topic){
+			boolean flag = false;
+			try {
+				flag = !(Boolean) ((JSONObject)object.get(topic)).get("ignore_message");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				//e.printStackTrace();
+			}
+			return flag;
 		}
 		
 		private void subscribe(String topic) throws ClientProtocolException, IOException{
@@ -251,6 +345,4 @@ public class MainActivity extends Activity implements OnClickListener {
 			HttpUtils.restPost(subscribe_url, "{}", resHandler);
 		}
 	}
-	
-	
 }

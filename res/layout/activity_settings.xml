@@ -8,6 +8,7 @@
         android:id="@+id/textViewWS"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:background="#93c572"
         android:text="Web Socket URL:"/>
     <EditText
         android:id="@+id/editTextWSURL"
@@ -22,6 +23,7 @@
         android:id="@+id/textViewPE"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:background="#93c572"
         android:text="Push Engine URL:"/>
     <EditText
         android:id="@+id/editTextPushEngine"
@@ -33,6 +35,7 @@
         android:id="@+id/textViewRS"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
+        android:background="#93c572"
         android:text="Register Server URL:"/>
     <EditText
         android:id="@+id/editTextRegisterServer"

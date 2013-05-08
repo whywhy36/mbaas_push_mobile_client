@@ -16,6 +16,7 @@
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/switchService"
         android:layout_marginTop="22dp"
+        android:background="#93c572"
         android:text="News Notification"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 

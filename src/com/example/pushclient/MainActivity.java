@@ -43,6 +43,9 @@ public class MainActivity extends Activity implements OnClickListener {
 	private static final int UNREGISTER_DEVICE = 4;
 	private static final int REENTER = 5;
 	
+	private static final int SERVICE_OK = 6;
+	private static final int SERVICE_FAIL = 7;
+	
 	ToggleButton mToggleButtonApple, mToggleButtonAmazon, mToggleButtonIntel, mToggleButtonGoogle, mToggleButtonMicrosoft, mToggleButtonVMware;
 	HashMap<String, Boolean> mButtonStates;
 	
@@ -238,16 +241,27 @@ public class MainActivity extends Activity implements OnClickListener {
 		}
 		
 		public void handleMessage(Message msg){
-			HashMap states = (HashMap) msg.obj;
 			
-			mToggleButtonApple.setChecked((Boolean) states.get("Apple"));
-			mToggleButtonAmazon.setChecked((Boolean) states.get("Amazon"));
-			mToggleButtonIntel.setChecked((Boolean) states.get("Intel"));
-			mToggleButtonGoogle.setChecked((Boolean) states.get("Google"));
-			mToggleButtonMicrosoft.setChecked((Boolean) states.get("Microsoft"));
-			mToggleButtonVMware.setChecked((Boolean) states.get("VMware"));
-			
-			setToggleButtonStatus(true);
+			switch(msg.what){
+			case SERVICE_OK:
+				HashMap states = (HashMap) msg.obj;
+				
+				mToggleButtonApple.setChecked((Boolean) states.get("Apple"));
+				mToggleButtonAmazon.setChecked((Boolean) states.get("Amazon"));
+				mToggleButtonIntel.setChecked((Boolean) states.get("Intel"));
+				mToggleButtonGoogle.setChecked((Boolean) states.get("Google"));
+				mToggleButtonMicrosoft.setChecked((Boolean) states.get("Microsoft"));
+				mToggleButtonVMware.setChecked((Boolean) states.get("VMware"));
+				
+				setToggleButtonStatus(true);
+				
+				break;
+			case SERVICE_FAIL:
+				if(!isTheServiceRunning()){
+					mSwitchService.setChecked(false);
+				}
+				break;
+			}
 		}
 	}
 	
@@ -281,11 +295,14 @@ public class MainActivity extends Activity implements OnClickListener {
 					break;
 				}
 			}catch(Exception e){
+				Message message = mUIHandler.obtainMessage();
+				message.what = SERVICE_FAIL;
+				mUIHandler.sendMessage(message);
 				e.printStackTrace();
 			}
 		}
 		
-		private void register() throws ClientProtocolException, IOException{
+		private void register() throws Exception{
 			ResponseHandler resHandler = new ResponseHandler(){
 				public Object handleResponse(HttpResponse response){
 					String responseString;
@@ -300,7 +317,13 @@ public class MainActivity extends Activity implements OnClickListener {
 				}
 			};
 			String register_url = registerServerUrl() + "/register";
-			HttpUtils.restPost(register_url, "{\"appKey\": \"3002\", \"deviceFingerPrint\": \"" + getDeviceId() + "\"}", resHandler);
+			try {
+				HttpUtils.restPost(register_url, "{\"appKey\": \"3002\", \"deviceFingerPrint\": \"" + getDeviceId() + "\"}", resHandler);
+			} catch (Exception e) {
+				showToast("Unable to start service: registering failed");
+				e.printStackTrace();
+				throw e;
+			}
 		}
 		
 		private String getDeviceId(){
@@ -311,7 +334,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			return deviceId;
 		}
 		
-		private void connectPE(boolean startServiceFlag) throws ClientProtocolException, IOException, JSONException{
+		private void connectPE(boolean startServiceFlag) throws Exception{
 			ResponseHandler resHandler = new ResponseHandler(){
 				public Object handleResponse(HttpResponse response){
 					String responseString;
@@ -350,15 +373,20 @@ public class MainActivity extends Activity implements OnClickListener {
 			JSONObject reqObj = new JSONObject();
 			reqObj.put("proto", "vns");
 			reqObj.put("token", regId);
-			if(startServiceFlag){
-				HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler);
-			}else{
-				HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler2);
+			try{
+				if(startServiceFlag){
+					HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler);
+				}else{
+					HttpUtils.restPost(subscribers_url, reqObj.toString(), resHandler2);
+				}
+			}catch(Exception e){
+				showToast("Unable to start service: connecting PE failed");
+				e.printStackTrace();
+				throw e;
 			}
-			
 		}
 		
-		private void fetchSubscribeList() throws ClientProtocolException, IOException{
+		private void fetchSubscribeList() throws Exception{
 			ResponseHandler resHandler = new ResponseHandler(){
 				@Override
 				public Object handleResponse(HttpResponse response)
@@ -373,6 +401,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						setTopicStatus(topicStatus, jsonObject);
 						
 						Message message = mUIHandler.obtainMessage();
+						message.what = SERVICE_OK;
 						message.obj = topicStatus;
 						mUIHandler.sendMessage(message);
 					}catch(Exception e){
@@ -384,7 +413,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			
 			showToast("Synchronizing the subscription list.");
 			String list_url = pushEngineUrl() + "/subscriber/" + subscriberId + "/subscriptions";
-			HttpUtils.restGet(list_url, resHandler);
+			try {
+				HttpUtils.restGet(list_url, resHandler);
+			} catch (Exception e) {
+				showToast("Unable to fetch the subscription list.");
+				e.printStackTrace();
+				throw e;
+			}
 		}
 		
 		private void setTopicStatus(HashMap<String, Boolean> maps, JSONObject object){
@@ -407,7 +442,7 @@ public class MainActivity extends Activity implements OnClickListener {
 			return flag;
 		}
 		
-		private void subscribe(String topic) throws ClientProtocolException, IOException{
+		private void subscribe(String topic) throws Exception{
 			ResponseHandler resHandler = new ResponseHandler(){
 				public Object handleResponse(HttpResponse response){
 					String responseString;
@@ -418,17 +453,22 @@ public class MainActivity extends Activity implements OnClickListener {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-					
 					return null;
 				}
 			};
 			Log.d(TAG, "try to subscribe topic:" + topic);
 			showToast("subscribing the topic " + topic);
 			String subscribe_url = pushEngineUrl() + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
-			HttpUtils.restPost(subscribe_url, "{}", resHandler);
+			try {
+				HttpUtils.restPost(subscribe_url, "{}", resHandler);
+			} catch (Exception e) {
+				showToast("subscribing topic " + topic + " failed.");
+				e.printStackTrace();
+				throw e;
+			}
 		}
 		
-		private void unsubscribe(String topic) throws ClientProtocolException, IOException{
+		private void unsubscribe(String topic) throws Exception {
 			ResponseHandler resHandler = new ResponseHandler(){
 				public Object handleResponse(HttpResponse response){
 					return null;
@@ -437,7 +477,13 @@ public class MainActivity extends Activity implements OnClickListener {
 			Log.d(TAG, "try to unsubscribe topic:" + topic);
 			showToast("unsubscribing the topic " + topic);
 			String subscribe_url = pushEngineUrl() + "/subscriber/" + subscriberId + "/subscriptions/" + topic;
-			HttpUtils.restDelete(subscribe_url, resHandler);
+			try {
+				HttpUtils.restDelete(subscribe_url, resHandler);
+			} catch (Exception e) {
+				showToast("Unsubscribing topic " + topic + " failed.");
+				e.printStackTrace();
+				throw e;
+			}
 		}
 	}
 }

@@ -1,6 +1,7 @@
 package com.example.pushclient;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
@@ -16,6 +17,7 @@ public class SettingsActivity extends Activity implements OnClickListener{
 	EditText mEditTextPushEngine;
 	EditText mEditTextRegisterServer;
 	Button mButtonSave;
+	Button mButtonBack;
 	
 	String TAG = "SettingActivity";
 	
@@ -28,7 +30,9 @@ public class SettingsActivity extends Activity implements OnClickListener{
 		mEditTextRegisterServer = (EditText) findViewById(R.id.editTextRegisterServer);
 		
 		mButtonSave = (Button) findViewById(R.id.buttonSettingSave);
+		mButtonBack = (Button) findViewById(R.id.buttonSettingsBack);
 		mButtonSave.setOnClickListener(this);
+		mButtonBack.setOnClickListener(this);
 	}
 	
 	protected void onStart(){
@@ -53,6 +57,9 @@ public class SettingsActivity extends Activity implements OnClickListener{
 		    	Log.d(TAG, "saved done");
 		    	Toast.makeText(this, "Save Successfully", Toast.LENGTH_SHORT).show();
 		    }
+		}else if(view.getId() == R.id.buttonSettingsBack){
+			Intent intent = new Intent(this, MainActivity.class);
+			startActivity(intent);
 		}
 	}
 }

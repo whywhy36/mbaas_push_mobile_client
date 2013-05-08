@@ -9,5 +9,11 @@
     <string name="start">start</string>
     <string name="stop">stop</string>
     <string name="info_name">Notification Message</string>
+    <string name="apple">Apple</string>
+    <string name="amazon">Amazon</string>
+    <string name="intel">Intel</string>
+    <string name="microsoft">Microsoft</string>
+    <string name="google">Google</string>
+    <string name="vmware">VMware</string>
 
 </resources>

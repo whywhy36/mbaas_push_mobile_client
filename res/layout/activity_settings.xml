@@ -4,6 +4,11 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
 
+    <TextView 
+        android:id="@+id/textViewWS"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="Web Socket URL:"/>
     <EditText
         android:id="@+id/editTextWSURL"
         android:layout_width="match_parent"
@@ -13,14 +18,22 @@
 
         <requestFocus />
     </EditText>
-
+	<TextView 
+        android:id="@+id/textViewPE"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="Push Engine URL:"/>
     <EditText
         android:id="@+id/editTextPushEngine"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Push Engine URL"
         android:ems="10" />
-
+	<TextView 
+        android:id="@+id/textViewRS"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:text="Register Server URL:"/>
     <EditText
         android:id="@+id/editTextRegisterServer"
         android:layout_width="match_parent"
@@ -33,5 +46,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Save" />
+    
+    <Button
+        android:id="@+id/buttonSettingsBack"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Back" />
 
 </LinearLayout>

@@ -10,7 +10,7 @@
 
     <TextView
         android:id="@+id/textViewStatus"
-        android:layout_width="fill_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/switchService"
         android:layout_alignParentTop="true"
@@ -33,131 +33,73 @@
         android:textOn="@string/stop" />
 
     <ToggleButton
-        android:id="@+id/ToggleButtonVMware"
-        android:layout_width="wrap_content"
+        android:id="@+id/ToggleButtonGoogle"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/ToggleButtonGoogle"
-        android:layout_alignTop="@+id/ToggleButtonMicrosoft"
+        android:layout_alignLeft="@+id/ToggleButtonAmazon"
+        android:layout_below="@+id/toggleButtonApple"
         android:onClick="onToggleClicked"
-        android:text="VMware"
-        android:textOff="@string/sub"
-        android:textOn="@string/unsub" />
+        android:text="Google"
+        android:textOff="@string/google"
+        android:textOn="@string/google" />
 
-    <TextView
-        android:id="@+id/textViewApple"
-        android:layout_width="wrap_content"
+    <ToggleButton
+        android:id="@+id/ToggleButtonIntel"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/toggleButtonApple"
-        android:layout_alignBottom="@+id/toggleButtonApple"
+        android:layout_alignLeft="@+id/ToggleButtonMicrosoft"
+        android:layout_centerVertical="true"
+        android:onClick="onToggleClicked"
+        android:text="Intel"
+        android:textOff="@string/intel"
+        android:textOn="@string/intel" />
+
+    <ToggleButton
+        android:id="@+id/toggleButtonApple"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/ToggleButtonIntel"
+        android:layout_alignLeft="@+id/ToggleButtonIntel"
+        android:layout_marginBottom="23dp"
+        android:onClick="onToggleClicked"
         android:text="Apple"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textOff="@string/apple"
+        android:textOn="@string/apple" />
 
     <ToggleButton
         android:id="@+id/ToggleButtonAmazon"
-        android:layout_width="wrap_content"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_alignBaseline="@+id/toggleButtonApple"
         android:layout_alignBottom="@+id/toggleButtonApple"
         android:layout_alignRight="@+id/switchService"
         android:onClick="onToggleClicked"
         android:text="Amazon"
-        android:textOff="@string/sub"
-        android:textOn="@string/unsub" />
-
-    <TextView
-        android:id="@+id/TextViewAmazon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/ToggleButtonAmazon"
-        android:layout_alignBottom="@+id/ToggleButtonAmazon"
-        android:layout_toLeftOf="@+id/ToggleButtonAmazon"
-        android:text="Amazon"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:id="@+id/TextViewMS"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/ToggleButtonMicrosoft"
-        android:layout_alignBottom="@+id/ToggleButtonMicrosoft"
-        android:layout_alignParentLeft="true"
-        android:text="Microsoft"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <TextView
-        android:id="@+id/TextViewVMware"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/ToggleButtonVMware"
-        android:layout_alignBottom="@+id/ToggleButtonVMware"
-        android:layout_toLeftOf="@+id/ToggleButtonAmazon"
-        android:text="VMware"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <ToggleButton
-        android:id="@+id/ToggleButtonGoogle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/ToggleButtonAmazon"
-        android:layout_below="@+id/toggleButtonApple"
-        android:onClick="onToggleClicked"
-        android:text="Google"
-        android:textOff="@string/sub"
-        android:textOn="@string/unsub" />
-
-    <TextView
-        android:id="@+id/TextViewGoogle"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/ToggleButtonGoogle"
-        android:layout_alignBottom="@+id/ToggleButtonGoogle"
-        android:layout_alignLeft="@+id/TextViewVMware"
-        android:text="Google"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <ToggleButton
-        android:id="@+id/ToggleButtonIntel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/ToggleButtonMicrosoft"
-        android:layout_centerVertical="true"
-        android:onClick="onToggleClicked"
-        android:text="Intel"
-        android:textOff="@string/sub"
-        android:textOn="@string/unsub" />
-    
-    <TextView
-        android:id="@+id/TextViewIntel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/ToggleButtonIntel"
-        android:layout_alignBottom="@+id/ToggleButtonIntel"
-        android:layout_alignLeft="@+id/TextViewMS"
-        android:text="Intel"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
-
-    <ToggleButton
-        android:id="@+id/toggleButtonApple"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@+id/ToggleButtonIntel"
-        android:layout_alignLeft="@+id/ToggleButtonIntel"
-        android:layout_marginBottom="22dp"
-        android:onClick="onToggleClicked"
-        android:text="Apple"
-        android:textOff="@string/sub"
-        android:textOn="@string/unsub" />
+        android:textOff="@string/amazon"
+        android:textOn="@string/amazon" />
 
     <ToggleButton
         android:id="@+id/ToggleButtonMicrosoft"
-        android:layout_width="wrap_content"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:layout_below="@+id/ToggleButtonIntel"
-        android:layout_marginTop="42dp"
-        android:layout_toRightOf="@+id/TextViewMS"
+        android:layout_marginTop="33dp"
+        android:layout_toLeftOf="@+id/switchService"
         android:onClick="onToggleClicked"
         android:text="Microsoft"
-        android:textOff="@string/sub"
-        android:textOn="@string/unsub" />
+        android:textOff="@string/microsoft"
+        android:textOn="@string/microsoft" />
+
+    <ToggleButton
+        android:id="@+id/ToggleButtonVMware"
+        android:layout_width="120dp"
+        android:layout_height="wrap_content"
+        android:layout_alignBaseline="@+id/ToggleButtonMicrosoft"
+        android:layout_alignBottom="@+id/ToggleButtonMicrosoft"
+        android:layout_alignLeft="@+id/ToggleButtonGoogle"
+        android:onClick="onToggleClicked"
+        android:text="VMware"
+        android:textOff="@string/vmware"
+        android:textOn="@string/vmware" />
 
 </RelativeLayout>

@@ -15,5 +15,7 @@
     <string name="microsoft">Microsoft</string>
     <string name="google">Google</string>
     <string name="vmware">VMware</string>
+    <string name="activity_title">News Notification</string>
+    <string name="switch_text">Service</string>
 
 </resources>

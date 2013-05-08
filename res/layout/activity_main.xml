@@ -12,12 +12,13 @@
         android:id="@+id/textViewStatus"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/switchService"
+        android:layout_alignLeft="@+id/toggleButtonApple"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/switchService"
         android:layout_marginTop="22dp"
         android:background="#93c572"
-        android:text="News Notification"
+        android:text="@string/activity_title"
+        android:gravity="center"
         android:textAppearance="?android:attr/textAppearanceLarge" />
 
     <Switch
@@ -29,7 +30,7 @@
         android:layout_marginRight="14dp"
         android:layout_marginTop="32dp"
         android:onClick="onToggleClicked"
-        android:text="Service"
+        android:text="@string/switch_text"
         android:textOff="@string/start"
         android:textOn="@string/stop" />
 

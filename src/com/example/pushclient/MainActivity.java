@@ -308,9 +308,10 @@ public class MainActivity extends Activity implements OnClickListener {
 					String responseString;
 					try {
 						responseString = EntityUtils.toString(response.getEntity());
-						regId = (String)HttpUtils.responseGet(responseString, "regId");
 						Log.d(TAG, "Response of register is " + responseString);
+						regId = (String)HttpUtils.responseGet(responseString, "regId");
 					}catch(Exception e){
+						showToast(e.toString());
 						e.printStackTrace();
 					}
 					return null;
@@ -348,6 +349,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						intent.putExtra("subscriberId", subscriberId);
 						startService(intent);
 					}catch(Exception e){
+						showToast(e.toString());
 						e.printStackTrace();
 					}	
 					return null;
@@ -363,6 +365,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						Log.d(TAG, "the response of connection to PE is " + responseString);
 						fetchSubscribeList();
 					}catch(Exception e){
+						showToast(e.toString());
 						e.printStackTrace();
 					}	
 					return null;
@@ -405,6 +408,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						message.obj = topicStatus;
 						mUIHandler.sendMessage(message);
 					}catch(Exception e){
+						showToast(e.toString());
 						e.printStackTrace();
 					}
 					return null;
@@ -451,6 +455,7 @@ public class MainActivity extends Activity implements OnClickListener {
 						Log.d(TAG, "the response of subscription is " + responseString);
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
+						showToast(e.toString());
 						e.printStackTrace();
 					}
 					return null;

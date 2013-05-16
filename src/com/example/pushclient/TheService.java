@@ -106,7 +106,6 @@ public class TheService extends Service {
 				@Override
 				public void onConnect() {
 					// TODO Auto-generated method stub
-					//Toast.makeText(that, "connected to " + webSocketUrl(), Toast.LENGTH_SHORT).show();
 					Log.d(TAG, "Status: Connected to " + webSocketUrl());
 
 					JSONObject jo = new JSONObject();

@@ -1,5 +1,10 @@
 package com.example.pushclient;
 
+import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
+
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -11,26 +16,28 @@ import android.app.TaskStackBuilder;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
+import android.os.Looper;
+import android.os.Message;
+import android.os.Process;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.codebutler.android_websockets.WebSocketClient;
 import com.example.pushclient.protocol.AckownledgeMessage;
-import com.example.pushclient.protocol.AckownledgeMessage.Info;
 import com.example.pushclient.protocol.PushMessage;
 import com.google.gson.Gson;
 
-import de.tavendo.autobahn.WebSocketConnection;
-import de.tavendo.autobahn.WebSocketException;
-import de.tavendo.autobahn.WebSocketHandler;
-import de.tavendo.autobahn.WebSocketOptions;
+
 
 public class TheService extends Service {
 
 	private static final String TAG = "TheService";
 	
-	private final WebSocketConnection mConnection = new WebSocketConnection();
+	private WebSocketClient mConnection = null;
 	
 	private String regId = null;
 	private String subscriberId = null;
@@ -38,6 +45,92 @@ public class TheService extends Service {
 	private Gson gson = null;
 	
 	NotificationCompat.Builder mNotificationBuilder;
+	
+	private WSHandler mHandler;
+	private Looper mWsLooper;
+	
+	Context that = this;
+	
+	private class WSHandler extends Handler {
+		public WSHandler(Looper looper){
+			super(looper);
+		}
+		
+		public void handleMessage(Message msg){
+			switch(msg.what){
+			case 1:
+				connect();
+				break;
+			case -1:
+				disconnect();
+				break;
+			}
+		}
+		
+		public void connect(){
+			List<BasicNameValuePair> extraHeaders = Arrays.asList(
+				    new BasicNameValuePair("Sec-WebSocket-Protocol", "msg-json"),
+				    new BasicNameValuePair("Upgrade", "websocket"),
+				    new BasicNameValuePair("Connection", "Upgrade")
+			);
+			
+			mConnection = new WebSocketClient(URI.create(webSocketUrl()), new WebSocketClient.Listener() {
+				
+				@Override
+				public void onMessage(byte[] data) {
+				}
+				
+				@Override
+				public void onMessage(String message) {
+					Log.d(TAG, "Message: " + message);
+					try{
+						processMessage(message);
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+				}
+				
+				@Override
+				public void onError(Exception error) {
+					// TODO Auto-generated method stub
+					Log.d(TAG, "Exception");
+					error.printStackTrace();
+				}
+				
+				@Override
+				public void onDisconnect(int code, String reason) {
+					// TODO Auto-generated method stub
+					Log.d(TAG, "Status: Connection lost.");
+				}
+				
+				@Override
+				public void onConnect() {
+					// TODO Auto-generated method stub
+					//Toast.makeText(that, "connected to " + webSocketUrl(), Toast.LENGTH_SHORT).show();
+					Log.d(TAG, "Status: Connected to " + webSocketUrl());
+
+					JSONObject jo = new JSONObject();
+					try {
+						jo.put("event", "addRegId");
+						jo.put("seq", "12345");
+						JSONArray ja = new JSONArray();
+						ja.put(regId);
+						jo.put("regIds", ja );
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					Log.d(TAG, "send back to server message :" + jo.toString());
+					mConnection.send(jo.toString());
+				}
+			}, extraHeaders);
+			mConnection.connect();
+		}
+		
+		public void disconnect(){
+			mConnection.disconnect();
+		}
+	}
 	
 	@Override
 	public IBinder onBind(Intent arg0) {
@@ -47,12 +140,18 @@ public class TheService extends Service {
 	
 	public void onCreate(){
 		showToast("The service created.");
+		that = this;
+		HandlerThread thread = new HandlerThread("ServiceBgArgument", Process.THREAD_PRIORITY_BACKGROUND);
+        thread.start();
+        
+        mWsLooper = thread.getLooper();
+		mHandler = new WSHandler(mWsLooper); 
 		Log.d(TAG, "onCreate");
 	}
 	
 	public void onDestroy(){
 		showToast("Disconnecting the server.");
-		mConnection.disconnect();
+		mHandler.sendEmptyMessage(-1);
 		showToast("The service destroyed.");
 		Log.d(TAG, "onDestroy");
 	}
@@ -102,46 +201,7 @@ public class TheService extends Service {
 	}
 	
 	private void start(){
-		try{
-			String[] sp = new String[1];
-			sp[0] = "msg-json";
-			
-			mConnection.connect(webSocketUrl(), sp, new WebSocketHandler(){
-				public void onOpen(){
-					showToast("Connected to " + webSocketUrl());
-					Log.d(TAG, "Status: Connected to " + webSocketUrl());
-
-					JSONObject jo = new JSONObject();
-					try {
-						jo.put("event", "addRegId");
-						jo.put("seq", "12345");
-						JSONArray ja = new JSONArray();
-						ja.put(regId);
-						jo.put("regIds", ja );
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					Log.d(TAG, "send back to server message :" + jo.toString());
-					mConnection.sendTextMessage(jo.toString());
-				}
-				
-				public void onTextMessage(String message){
-					Log.d(TAG, "Message: " + message);
-					try{
-						processMessage(message);
-					}catch(Exception e){
-						e.printStackTrace();
-					}
-				}
-				
-				public void onClose(){
-					Log.d(TAG, "Status: Connection lost.");
-				}
-			}, new WebSocketOptions());
-		}catch(WebSocketException e){
-			Log.d(TAG, e.toString());
-		}
+		mHandler.sendEmptyMessage(1);
 	}
 	
 	private void processMessage(String message) throws Exception{
@@ -167,7 +227,7 @@ public class TheService extends Service {
 			
 			String response = gson.toJson(ackMessage);
 			Log.d(TAG, "the response is :" + response);
-			mConnection.sendTextMessage(response);
+			mConnection.send(response);
 		}else{
 			// do nothing
 		}
